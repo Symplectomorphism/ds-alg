@@ -22,7 +22,6 @@ istream& operator >>( istream& input, Elf& e ) {
     while ( getline(input, s) )
     {
         if (s.empty()) {
-            cout << "Empty line." << endl;
             break;
         }
         istringstream tmp {s};
@@ -31,8 +30,8 @@ istream& operator >>( istream& input, Elf& e ) {
         e.add_cal(n);
     }
     
-    for ( auto c : e.get_cal() )
-        cout << c << endl;
+    // for ( auto c : e.get_cal() )
+    //     cout << c << endl;
 
     return input;
 }
@@ -41,24 +40,23 @@ int main() {
     vector<Elf> elves {};
     ifstream ist {"input"};
 
-    int n = 0;
+    /*
+     * I'm not sure why, but the following
+     * does not work!
+    for ( Elf e; ist >> e; ) {
+        elves.push_back(e);
+        n++;
+    }
+    */
 
-    // for ( Elf e; ist >> e; ) {
-    //     elves.push_back(e);
-    //     n++;
-    // }
-    // cout << n << endl;
+    while (!ist.eof()) {
+        Elf e;
+        ist >> e;
+        elves.push_back(e);
+    }
 
-    Elf e1, e2, e3;
-    ist >> e1 >> e2 >> e3;
-
-    elves.push_back(e1);
-    elves.push_back(e2);
-    elves.push_back(e3);
-
-    for ( Elf e : elves )
-        for ( auto c : e.get_cal() )
-            cout << c << endl;
+    for ( auto c : elves[251].get_cal() )
+        cout << c << endl;
 
     return 0;
 }
