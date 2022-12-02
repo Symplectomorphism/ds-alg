@@ -29,9 +29,6 @@ istream& operator >>( istream& input, Elf& e ) {
         tmp >> n;
         e.add_cal(n);
     }
-    
-    // for ( auto c : e.get_cal() )
-    //     cout << c << endl;
 
     return input;
 }
@@ -43,9 +40,9 @@ int main() {
     /*
      * I'm not sure why, but the following
      * does not work!
+     *
     for ( Elf e; ist >> e; ) {
         elves.push_back(e);
-        n++;
     }
     */
 
@@ -55,8 +52,8 @@ int main() {
         elves.push_back(e);
     }
 
-    for ( auto c : elves[251].get_cal() )
-        cout << c << endl;
+    // for ( auto c : elves[251].get_cal() )
+    //     cout << c << endl;
 
     return 0;
 }

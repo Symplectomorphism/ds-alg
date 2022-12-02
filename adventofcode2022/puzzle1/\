@@ -52,8 +52,8 @@ int main() {
         elves.push_back(e);
     }
 
-    // for ( auto c : elves[251].get_cal() )
-    //     cout << c << endl;
+    for ( auto c : elves[251].get_cal() )
+        cout << c << endl;
 
     return 0;
 }
