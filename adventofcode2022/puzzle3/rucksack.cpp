@@ -7,8 +7,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define ALPHABETS_COUNT 26 
-
 class Rucksack {
     public:
         Rucksack () : same(0) {
@@ -75,17 +73,10 @@ int main() {
     }
     sacks.pop_back();
 
-    // cout << sacks.size() << endl;
     for ( Rucksack r : sacks ) {
         proxies.push_back(r.get_value());
-        // cout << r.get_contents() << ": " << r.get_same() << ", " << r.get_value()
-        //      << endl;
     }
-
     cout << accumulate(proxies.begin(), proxies.end(), 0) << endl;
-
-    // cout << endl << sacks[0].get_first() << " | " << sacks[0].get_second() << endl;
-    // cout << sacks[0].get_same() << " with value: " << sacks[0].get_value() << endl;
 
     return 0;
 }
