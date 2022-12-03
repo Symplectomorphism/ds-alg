@@ -9,7 +9,7 @@ using namespace std;
 
 class Rucksack {
     public:
-        Rucksack () {
+        Rucksack () : value(0) {
             unordered_map<char, int> tmp;
             for (int i=97; i<123; ++i) {
                 dict.insert( make_pair<char, int> ((char)(i), i-96) );
@@ -48,8 +48,7 @@ istream& operator >>( istream& input, Rucksack& r ) {
 }
 
 void Rucksack::find_same() {
-    vector<int> keyvec (52, 0);
-    int j = 0;
+    bool flag = true;
     for ( int i=0; i<3; ++i ) {
         for ( auto& ch : contents[i] ) {
             freq[i].at(ch) += 1;
@@ -57,20 +56,20 @@ void Rucksack::find_same() {
     }
     for (int i=97; i<123; ++i) {
         char ch = (char)(i);
-        keyvec[j] = freq[0].at(ch) * freq[1].at(ch) * freq[2].at(ch);
-        if (keyvec[j] != 0) { break; }
-        ++j;
+        ++value;
+        if (freq[0].at(ch) * freq[1].at(ch) * freq[2].at(ch) != 0) { 
+            flag = false; 
+            break; 
+        }
     }
-    if ( keyvec[j] == 0 ) {
+    if ( flag ) {
         for (int i=65; i<91; ++i) {
+            ++value;
             char ch = (char)(i);
-            keyvec[j] = freq[0].at(ch) * freq[1].at(ch) * freq[2].at(ch);
-            if (keyvec[j] != 0) { break; }
-            ++j;
+            if (freq[0].at(ch) * freq[1].at(ch) * freq[2].at(ch) != 0) { break; }
         }
     }
     
-    value = j+1;
     for ( auto& iter : dict ) { 
         if ( iter.second == value ) { same = iter.first; }
     }
