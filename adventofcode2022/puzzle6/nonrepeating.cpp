@@ -7,7 +7,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define WINDOW_LENGTH 4;
+#define WINDOW_LENGTH 4
 
 class DataStream {
     public:
