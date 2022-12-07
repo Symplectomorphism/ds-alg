@@ -7,6 +7,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+#define WINDOW_LENGTH 4;
+
 class DataStream {
     public:
         DataStream () : state(0), found(false) {
@@ -19,7 +21,7 @@ class DataStream {
         int get_state() { return state; }
         bool get_found() { return found; }
         void assignWindow() { 
-            window = data.substr(state, 4); 
+            window = data.substr(state, WINDOW_LENGTH); 
             cout << window << endl;
         }
         void processWindow();
@@ -40,7 +42,7 @@ istream& operator >>( istream& input, DataStream& ds ) {
 
 void DataStream::processWindow() {
     char ch;
-    for (int i=0; i<4; ++i) {
+    for (int i=0; i<WINDOW_LENGTH; ++i) {
         ch = window.at(i);
         freq.at(ch) += 1;
     }
@@ -69,10 +71,9 @@ int main() {
     DataStream ds;
     ist >> ds;
 
-    // cout << ds.get_data() << endl;
     while (!ds.get_found())
         ds.processWindow();
-    cout << ds.get_state()+4 << endl;
+    cout << ds.get_state()+WINDOW_LENGTH << endl;
 
 
     return 0;
