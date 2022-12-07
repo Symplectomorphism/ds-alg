@@ -42,9 +42,16 @@ class Stacks {
         }
         void pop(int i) { stacks[i].pop(); }
         void move(int n, int m, int l) {
+            stack<char> tmp;
             for(int j=0; j<n; ++j) {
-                stacks[l-1].push(stacks[m-1].top());
+                // stacks[l-1].push(stacks[m-1].top());
+                // stacks[m-1].pop();
+                tmp.push(stacks[m-1].top());
                 stacks[m-1].pop();
+            }
+            for (int j=0; j<n; ++j) {
+                stacks[l-1].push(tmp.top());
+                tmp.pop();
             }
         }
     private:
