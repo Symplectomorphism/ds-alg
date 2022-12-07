@@ -102,6 +102,15 @@ int main() {
         st.move(n, m, l);
     }
 
+    
+    // for (int i=0; i<9; ++i) {
+    //     while ( st.get_stacks()[i].size() ) {
+    //         cout << st.get_stacks()[i].top() << " ";
+    //         st.pop(i);
+    //     }
+    //     cout << endl;
+    // }
+
     for (int i=0; i<9; ++i)
         cout << st.get_stacks()[i].top();
     cout << endl;
