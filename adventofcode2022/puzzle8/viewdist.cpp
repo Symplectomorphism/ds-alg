@@ -53,34 +53,32 @@ MatrixXd readMatrix( const char* filename ) {
     return result;
 }
 
-int countVisible( MatrixXd& A ) {
-    int vis_count = 0;
-    int max_west = 0, max_east = 0, max_north = 0, max_south = 0;
+int viewDistance ( MatrixXd& A ) {
+    int bestview = 0;
+    int dist_west = 1, dist_east = 1, dist_north = 1, dist_south = 1;
 
     for ( int i=1; i<A.rows()-1; ++i ) {
         for ( int j=1; j<A.cols()-1; ++j ) {
-            auto it = max_element( A(i, seq(0, j-1)).begin(), A(i, seq(0, j-1)).end() );
-            max_west = *it;
-            it = max_element( A(i, seq(j+1, last)).begin(), A(i, seq(j+1, last)).end() );
-            max_east = *it;
-            auto iter = max_element( A(seq(0, i-1), j).begin(), A(seq(0, i-1), j).end() );
-            max_north = *iter;
-            iter = max_element( A(seq(i+1, last), j).begin(), A(seq(i+1, last), j).end() );
-            max_south = *iter;
-// 
-            if ( max_west < A(i,j) || max_east < A(i,j) || max_north < A(i,j) || max_south < A(i,j) )
-                vis_count++;
+            while (j-dist_west>0 && A(i,j-dist_west) < A(i,j)) { dist_west++; } 
+            while (j+dist_east<A.cols()-1 && A(i,j+dist_east) < A(i,j)) { dist_east++; } 
+            while (i-dist_north>0 && A(i-dist_north, j) < A(i,j)) { dist_north++; } 
+            while (i+dist_south<A.rows()-1 && A(i+dist_south, j) < A(i,j)) { dist_south++; } 
+
+            int tmp_view = dist_west * dist_east * dist_north * dist_south;
+
+            if ( tmp_view > bestview ) 
+                bestview = tmp_view; 
+            dist_west = 1, dist_east = 1, dist_north = 1, dist_south = 1;
         }
     }
 
-    return vis_count + 2*(A.rows()-1) + 2*(A.cols()-1);
+    return bestview;
 }
 
 int main() {
-    MatrixXd A = readMatrix("myinput");
-    cout << A.rows() << " " << A.cols() << endl;
-    int vis_count = countVisible(A);
-    cout << vis_count << endl;
+    MatrixXd A = readMatrix("input");
+    int score = viewDistance(A);
+    cout << score << endl;
 
     return 0;
 }
