@@ -12,18 +12,29 @@ using namespace Eigen;
 
 
 struct Odom {
-    Odom(char c, int d) :  x(0), y(0) {
+    Odom(char c, int d) :  c(c), d(d) {
         switch (c) {
             case 'L':
+                cout << endl << "Going left!" << endl;
                 x = -1;
+                y = 0;
+                break;
             case 'R':
+                cout << endl << "Going right!" << endl;
                 x = 1;
+                y = 0;
+                break;
             case 'D':
+                cout << endl << "Going down!" << endl;
+                x = 0;
                 y = -1;
+                break;
             case 'U':
+                cout << endl << "Going up!" << endl;
+                x = 0;
                 y = 1;
+                break;
         }
-   
     };
     Odom ( int x, int y ) : c(0), d(0), x(x), y(y) {}; 
 
@@ -74,6 +85,7 @@ istream& operator >>( istream& input, Rope& r ) {
     int d;
     input >> c >> d;
     Odom o {c, d};
+    cout << o.c << " " << o.d << endl;
     r.processLine(o);
 
     return input;
@@ -86,9 +98,11 @@ ostream& operator<<(ostream& os, const Rope& r) {
 }
 
 void Rope::processLine(Odom o) {
+    cout << o.x << " " << o.y << endl;
     cout << *this;
     for (int i=0; i<o.d; ++i) {
         move(o.x, o.y);
+        cout << *this;
     } 
 }
 
@@ -104,46 +118,51 @@ void Rope::move ( int ox, int oy ) {
             if ( rel_ht.x == -1 ) {
                 if (rel_nhh.x == -1)
                     tail = head;
-                else if (rel_nhh.y != 0) {
-                    Odom tmp { -1, 0 };
-                    tail.move( tmp );
-                }
+                // else if (rel_nhh.y != 0) {
+                //     Odom tmp { -1, 0 };
+                //     tail.move( tmp );
+                // }
             }
             else if ( rel_ht.x == 1 ) {
                 if (rel_nhh.x == 1)
                     tail = head;
-                else if (rel_nhh.y != 0) {
-                    Odom tmp { 1, 0 };
-                    tail.move( tmp );
-                }
+                // else if (rel_nhh.y != 0) {
+                //     Odom tmp { 1, 0 };
+                //     tail.move( tmp );
+                // }
             }
             else if ( rel_ht.y == -1 ) {
                 if (rel_nhh.y == -1)
                     tail = head;
-                else if (rel_nhh.x != 0) {
-                    Odom tmp { 0, -1 };
-                    tail.move( tmp );
-                }
+                // else if (rel_nhh.x != 0) {
+                //     Odom tmp { 0, -1 };
+                //     tail.move( tmp );
+                // }
             }
             else {
                 if (rel_nhh.y == 1)
                     tail = head;
-                else if (rel_nhh.x != 0) {
-                    Odom tmp {0, 1};
-                    tail.move(tmp);
-                }
+                // else if (rel_nhh.x != 0) {
+                //     Odom tmp {0, 1};
+                //     tail.move(tmp);
+                // }
             }
+            break;
         case 2:
             if ( taxicab(rel_nht) > 2 )
                 tail = head;
+            break;
     }
     head = next_head;
 }
 
 int main() {
-    ifstream ist {"myinput_cropped"};
+    ifstream ist {"myinput"};
     Rope r;
-    ist >> r;
+
+    do 
+        ist >> r;
+    while (ist.good() );
 
     return 0;
 }
