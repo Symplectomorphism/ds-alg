@@ -149,7 +149,7 @@ int main() {
 
     do {
         ist >> r;
-        cout << "Hello" << endl;
+        // cout << "Hello" << endl;
     } while (ist.good() );
 
     cout << r.get_visited().size() << endl;
