@@ -55,16 +55,15 @@ struct Point {
         y += v.y;
     }
 
-    bool operator< ( const Point& rhs ); // Need to remember how to do this properly.
+    friend bool operator< ( Point const&lhs, Point const& rhs );
 };
 
-bool Point::operator< ( const Point& rhs ) {
-    if ( x < rhs.x )
+bool operator< ( Point const& lhs, Point const& rhs ) {
+    if ( lhs.x < rhs.x )
         return true;
-    else if ( x == rhs.x )
-        if ( y < rhs.y ) { return true; }
-    else
-        return false;
+    else if ( lhs.x == rhs.x )
+        if ( lhs.y < rhs.y ) { return true; }
+    return false;
 }
 
 Odom relative ( Point p, Point q ) { return Odom {p.x-q.x, p.y-q.y}; }
@@ -80,6 +79,7 @@ class Rope {
     public:
         Point get_head() { return head; }
         Point get_tail() { return tail; }
+        set<Point> get_visited() { return tail_visited; }
         void processLine(Odom o);
         void move(int ox, int oy); 
     private:
@@ -127,18 +127,10 @@ void Rope::move ( int ox, int oy ) {
 
     switch (distance) {
         case 1:
-            if ( rel_ht.x == -1 )
-                if (rel_nhh.x == -1)
-                    tail = head;
-            else if ( rel_ht.x == 1 )
-                if (rel_nhh.x == 1)
-                    tail = head;
-            else if ( rel_ht.y == -1 )
-                if (rel_nhh.y == -1)
-                    tail = head;
-            else
-                if (rel_nhh.y == 1)
-                    tail = head;
+            if ( rel_ht.x == 1 && rel_nhh.x == 1 ) { tail = head; }
+            if ( rel_ht.x == -1 && rel_nhh.x == -1 ) { tail = head; }
+            if ( rel_ht.y == 1 && rel_nhh.y == 1 ) { tail = head; }
+            if ( rel_ht.y == -1 && rel_nhh.y == -1 ) { tail = head; }
             break;
         case 2:
             if ( taxicab(rel_nht) > 2 )
@@ -152,12 +144,15 @@ void Rope::move ( int ox, int oy ) {
 }
 
 int main() {
-    ifstream ist {"myinput"};
+    ifstream ist {"input"};
     Rope r;
 
-    do 
+    do {
         ist >> r;
-    while (ist.good() );
+        cout << "Hello" << endl;
+    } while (ist.good() );
+
+    cout << r.get_visited().size() << endl;
 
     return 0;
 }
