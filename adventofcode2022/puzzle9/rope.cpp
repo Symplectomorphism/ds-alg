@@ -115,38 +115,18 @@ void Rope::move ( int ox, int oy ) {
 
     switch (distance) {
         case 1:
-            if ( rel_ht.x == -1 ) {
+            if ( rel_ht.x == -1 )
                 if (rel_nhh.x == -1)
                     tail = head;
-                // else if (rel_nhh.y != 0) {
-                //     Odom tmp { -1, 0 };
-                //     tail.move( tmp );
-                // }
-            }
-            else if ( rel_ht.x == 1 ) {
+            else if ( rel_ht.x == 1 )
                 if (rel_nhh.x == 1)
                     tail = head;
-                // else if (rel_nhh.y != 0) {
-                //     Odom tmp { 1, 0 };
-                //     tail.move( tmp );
-                // }
-            }
-            else if ( rel_ht.y == -1 ) {
+            else if ( rel_ht.y == -1 )
                 if (rel_nhh.y == -1)
                     tail = head;
-                // else if (rel_nhh.x != 0) {
-                //     Odom tmp { 0, -1 };
-                //     tail.move( tmp );
-                // }
-            }
-            else {
+            else
                 if (rel_nhh.y == 1)
                     tail = head;
-                // else if (rel_nhh.x != 0) {
-                //     Odom tmp {0, 1};
-                //     tail.move(tmp);
-                // }
-            }
             break;
         case 2:
             if ( taxicab(rel_nht) > 2 )
