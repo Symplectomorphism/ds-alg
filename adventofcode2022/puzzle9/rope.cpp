@@ -54,7 +54,18 @@ struct Point {
         x += v.x;
         y += v.y;
     }
+
+    bool operator< ( const Point& rhs ); // Need to remember how to do this properly.
 };
+
+bool Point::operator< ( const Point& rhs ) {
+    if ( x < rhs.x )
+        return true;
+    else if ( x == rhs.x )
+        if ( y < rhs.y ) { return true; }
+    else
+        return false;
+}
 
 Odom relative ( Point p, Point q ) { return Odom {p.x-q.x, p.y-q.y}; }
 
@@ -136,8 +147,8 @@ void Rope::move ( int ox, int oy ) {
     }
     head = next_head;
 
-    // if ( tail_visited.find(tail) == tail_visited.end() )
-    //     tail_visited.insert(tail);
+    if ( tail_visited.find(tail) == tail_visited.end() )
+        tail_visited.insert(tail);
 }
 
 int main() {
