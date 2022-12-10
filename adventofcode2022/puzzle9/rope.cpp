@@ -75,6 +75,7 @@ class Rope {
         Point start;
         Point head;
         Point tail;
+        set<Point> tail_visited;
         
         friend ostream& operator <<(ostream& os, const Rope& r);
         friend istream& operator >>(istream& input, Rope& r);
@@ -134,6 +135,9 @@ void Rope::move ( int ox, int oy ) {
             break;
     }
     head = next_head;
+
+    // if ( tail_visited.find(tail) == tail_visited.end() )
+    //     tail_visited.insert(tail);
 }
 
 int main() {
