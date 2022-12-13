@@ -10,7 +10,7 @@
 using namespace std;
 // using namespace Eigen;
 
-#define GAMMA 0.9
+#define GAMMA 1.0 
 
 enum class Action {
     down, 
@@ -33,22 +33,22 @@ struct Odom {
     Odom(Action a) :  a(a) {
         switch (a) {
             case Action::down:
-                cout << endl << "Going down!" << endl;
+                // cout << endl << "Going down!" << endl;
                 x = 1;
                 y = 0;
                 break;
             case Action::up:
-                cout << endl << "Going up!" << endl;
+                // cout << endl << "Going up!" << endl;
                 x = -1;
                 y = 0;
                 break;
             case Action::right:
-                cout << endl << "Going right!" << endl;
+                // cout << endl << "Going right!" << endl;
                 x = 0;
                 y = 1;
                 break;
             case Action::left:
-                cout << endl << "Going left!" << endl;
+                // cout << endl << "Going left!" << endl;
                 x = 0;
                 y = -1;
                 break;
@@ -79,7 +79,7 @@ struct Point {
 };
 
 ostream& operator<<(ostream& os, const Point& p) {
-    os << "(" << p.x << ", " << p.y << ")" << endl;
+    os << "(" << p.x << ", " << p.y << ")";
 
     return os;
 }
@@ -130,22 +130,31 @@ int taxicab ( Point p, Point q ) {
 
 class ElvenHill {
     public:
-        ElvenHill () : theta(0.0001) {};
+        ElvenHill () {};
         Point get_start() { return start; }
         Point get_end() { return end; }
+        int get_elevation() { return elevation[get_state()]; }
         int get_elevation(Point p) { return elevation[p]; }
+        float get_value() { return value[get_state()]; }
         float get_value(Point p) { return value[p]; }
         Point get_state() { return state; }
+        Action get_policy() { return policy[get_state()]; }
         Action get_policy(Point p) { return policy[p]; }
         void set_policy(Action a) { policy[get_state()] = a; }
         void set_policy(Point p, Action a) { policy[p] = a; }
+        void set_state(Point p) { state = p; }
         pair<int, int> get_size () { return size; }
         void processLine(string, int);
-        int reward( Point p ) { return taxicab(p, end); }
+        float reward( Point p, Point q ) { 
+            if ( p == end || q == end ) { return 0.0; }
+            return -1.0;
+        }
         Point transition ( Point p, Action a );
         void next_state () { state = transition(get_state(), get_policy(get_state())); }
         void next_state ( Point p ) { state = transition(p, get_policy(p)); }
+        void next_state ( Action a ) { state = transition(get_state(), a); }
         void next_state ( Point p, Action a ) { state = transition(p, a); }
+        void ValueIteration(float theta);
     private:
         Point start;
         Point end;
@@ -154,7 +163,6 @@ class ElvenHill {
         unordered_map<Point, Action, std::hash<Point>> policy;
         Point state;
         pair<int, int> size;
-        float theta;
 
         friend ostream& operator <<(ostream& os, const ElvenHill& m);
         friend istream& operator >>(istream& input, ElvenHill& m);
@@ -198,10 +206,11 @@ void ElvenHill::processLine(string line, int i) {
             c = 'z';
         }
         elevation.insert( make_pair(p, c-a) );
-        value.insert( make_pair(p, 0.0) );
+        value.insert( make_pair(p, -10.0) );
         policy.insert( make_pair(p, Action::down) );
-        cout << "(" << p.x << ", " << p.y << "): " << (int)(c-a) << endl;
+        // cout << "(" << p.x << ", " << p.y << "): " << (int)(c-a) << endl;
     }
+    value[end] = 0.0;
     state = start;
 }
 
@@ -214,7 +223,31 @@ Point ElvenHill::transition ( Point p, Action a ) {
         return p;
     if (elevation[tmp] > elevation[p]+1)
         return p;
+    if ( tmp == end )
+        return p;
     return tmp;
+}
+
+void ElvenHill::ValueIteration (float theta) {
+    float Delta = 0.0;
+    while ( Delta < theta ) {
+        map<Point, int>::iterator it;
+        for (it=elevation.begin(); it!=elevation.end(); it++) {
+            Point s = it->first;
+            float v = value[s];
+            vector<Action> actions {Action::down, Action::up, Action::right, Action::left};
+            vector<float> vals;
+            for ( const auto& a : actions ) {
+                Point tmp = transition(s, a);
+                cout << s << " " << tmp <<  " " << reward(s, tmp) + GAMMA*value[tmp] << " ";
+                vals.push_back( reward(s, tmp) + GAMMA*value[tmp] );
+            }
+            cout << endl;
+            value[s] = *max_element(vals.begin(), vals.end());
+            cout << "Point: " << s << ", Value: " << value[s] << endl;
+            Delta = max( Delta, abs(v-value[s]) );
+        }
+    }
 }
 
 int main() {
@@ -222,14 +255,35 @@ int main() {
     ElvenHill m;
     ist >> m;
 
-    cout << m.get_state();
-    m.next_state();
-    cout << m.get_state();
-    m.next_state();
-    cout << m.get_state();
-    m.set_policy(Action::right);
-    m.next_state();
-    cout << m.get_state();
+    Action a {Action::right};
+    Odom o {a};
+    Point p = m.get_state();
+
+    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+    m.set_state(p) ;
+    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+    m.set_state(p) ;
+    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+    m.set_state(p) ;
+    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+    m.set_state(p) ;
+    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+    m.set_state(p) ;
+    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+    m.set_state(p) ;
+    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+    m.set_state(p) ;
+    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+    m.set_state(p) ;
+    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+    m.set_state(p) ;
+    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+    m.set_state(p) ;
+
+    cout << m.size().first << " " << m.size().second;
+
+
+    // m.ValueIteration(0.00001);
 
     return 0;
 }
