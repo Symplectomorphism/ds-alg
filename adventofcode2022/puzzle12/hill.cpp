@@ -130,6 +130,7 @@ int taxicab ( Point p, Point q ) {
 
 class ElvenHill {
     public:
+        ElvenHill () : theta(0.0001) {};
         Point get_start() { return start; }
         Point get_end() { return end; }
         int get_elevation(Point p) { return elevation[p]; }
@@ -153,6 +154,7 @@ class ElvenHill {
         unordered_map<Point, Action, std::hash<Point>> policy;
         Point state;
         pair<int, int> size;
+        float theta;
 
         friend ostream& operator <<(ostream& os, const ElvenHill& m);
         friend istream& operator >>(istream& input, ElvenHill& m);
