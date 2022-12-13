@@ -73,10 +73,16 @@ struct Point {
         y += v.y;
     }
 
+    friend ostream& operator <<(ostream& os, const Point& p);
     friend bool operator< ( Point const&lhs, Point const& rhs );
     friend bool operator== ( Point const&lhs, Point const& rhs );
 };
 
+ostream& operator<<(ostream& os, const Point& p) {
+    os << "(" << p.x << ", " << p.y << ")" << endl;
+
+    return os;
+}
 bool operator== ( Point const& lhs, Point const& rhs ) {
     if ( lhs.x == rhs.x && lhs.y == rhs.y )
         return true;
@@ -128,11 +134,16 @@ class ElvenHill {
         Point get_end() { return end; }
         int get_elevation(Point p) { return elevation[p]; }
         float get_value(Point p) { return value[p]; }
+        Point get_state() { return state; }
         Action get_policy(Point p) { return policy[p]; }
+        void set_policy(Action a) { policy[get_state()] = a; }
+        void set_policy(Point p, Action a) { policy[p] = a; }
         pair<int, int> get_size () { return size; }
         void processLine(string, int);
         int reward( Point p ) { return taxicab(p, end); }
         Point transition ( Point p, Action a );
+        void next_state () { state = transition(get_state(), get_policy(get_state())); }
+        void next_state ( Point p ) { state = transition(p, get_policy(p)); }
         void next_state ( Point p, Action a ) { state = transition(p, a); }
     private:
         Point start;
@@ -194,12 +205,12 @@ void ElvenHill::processLine(string line, int i) {
 
 Point ElvenHill::transition ( Point p, Action a ) {
     Odom o {a};
-    Point tmp {p.x + o.x, p.x+o.y};
+    Point tmp {p.x + o.x, p.y+o.y};
     if (tmp.x < 0 || tmp.x > size.first)
         return p;
     if (tmp.y < 0 || tmp.y > size.second)
         return p;
-    if (elevation[tmp] > elevation[p]+1) 
+    if (elevation[tmp] > elevation[p]+1)
         return p;
     return tmp;
 }
@@ -209,9 +220,14 @@ int main() {
     ElvenHill m;
     ist >> m;
 
-    cout << m.get_elevation(m.get_end()) << endl;
-    cout << m.get_policy(m.get_end()) << endl;
-    cout << m.get_size().first << " " << m.get_size().second << endl;
+    cout << m.get_state();
+    m.next_state();
+    cout << m.get_state();
+    m.next_state();
+    cout << m.get_state();
+    m.set_policy(Action::right);
+    m.next_state();
+    cout << m.get_state();
 
     return 0;
 }
