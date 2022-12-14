@@ -10,7 +10,7 @@
 using namespace std;
 // using namespace Eigen;
 
-#define GAMMA 1.0 
+#define GAMMA 1.0
 
 enum class Action {
     down, 
@@ -146,7 +146,7 @@ class ElvenHill {
         pair<int, int> get_size () { return size; }
         void processLine(string, int);
         float reward( Point p, Point q ) { 
-            if ( p == end || q == end ) { return 0.0; }
+            if ( p == end ) { return 0.0; }
             return -1.0;
         }
         Point transition ( Point p, Action a );
@@ -174,13 +174,20 @@ istream& operator >>( istream& is, ElvenHill& m ) {
     getline(is, line);
     m.processLine(line, i);
     i++;
-    m.size.second = line.length();
+    m.size.second = line.length()-1;
     while ( !is.eof() ) {
         getline(is, line);
         m.processLine(line, i);
         i++;
     }
-    m.size.first = i-1;
+    m.size.first = i-2;
+    m.value[m.get_end()] = 0.0;
+
+    // map<Point, int>::iterator it;
+    // for (it=m.elevation.begin(); it!=m.elevation.end(); it++) {
+    //     Point p = it->first;
+    //     cout << "(" << p.x << ", " << p.y << "): " << m.value[p] << endl;
+    // }
 
     return is;
 }
@@ -206,11 +213,10 @@ void ElvenHill::processLine(string line, int i) {
             c = 'z';
         }
         elevation.insert( make_pair(p, c-a) );
-        value.insert( make_pair(p, -10.0) );
+        value.insert( make_pair(p, -1000.0) );
         policy.insert( make_pair(p, Action::down) );
         // cout << "(" << p.x << ", " << p.y << "): " << (int)(c-a) << endl;
     }
-    value[end] = 0.0;
     state = start;
 }
 
@@ -223,14 +229,17 @@ Point ElvenHill::transition ( Point p, Action a ) {
         return p;
     if (elevation[tmp] > elevation[p]+1)
         return p;
-    if ( tmp == end )
+    if ( p == end )
         return p;
     return tmp;
 }
 
 void ElvenHill::ValueIteration (float theta) {
-    float Delta = 0.0;
-    while ( Delta < theta ) {
+    float Delta = 100000.0;
+    int i = 0;
+//     for ( int i=0; i<100; ++i ) {
+    while ( Delta > theta ) {
+        Delta = 0.0;
         map<Point, int>::iterator it;
         for (it=elevation.begin(); it!=elevation.end(); it++) {
             Point s = it->first;
@@ -239,51 +248,66 @@ void ElvenHill::ValueIteration (float theta) {
             vector<float> vals;
             for ( const auto& a : actions ) {
                 Point tmp = transition(s, a);
-                cout << s << " " << tmp <<  " " << reward(s, tmp) + GAMMA*value[tmp] << " ";
+                // cout << s << " " << tmp <<  " " << reward(s, tmp) + GAMMA*value[tmp] << " ";
                 vals.push_back( reward(s, tmp) + GAMMA*value[tmp] );
             }
-            cout << endl;
+            // cout << endl;
+            // cout << vals[0] << " " << vals[1] << " " << vals[2] << " " << vals[3] << endl;
             value[s] = *max_element(vals.begin(), vals.end());
-            cout << "Point: " << s << ", Value: " << value[s] << endl;
+            // cout << "Point: " << s << ", Value: " << value[s] << endl << endl;
             Delta = max( Delta, abs(v-value[s]) );
+//             cout << "Point: " << s << ", Delta: " << Delta << " " << v << " " << value[s] << endl;
         }
+        cout << "Value[start] = " << value[start] << ", Delta = " << Delta 
+             << ", Iteration = " << ++i << endl;
     }
 }
 
 int main() {
-    ifstream ist {"myinput"};
+    ifstream ist {"input"};
     ElvenHill m;
     ist >> m;
 
-    Action a {Action::right};
-    Odom o {a};
-    Point p = m.get_state();
+//     Action a {Action::right};
+//     Odom o {a};
+//     Point p = m.get_state();
+// 
+//     cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+//     m.set_state(p) ;
+//     cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+//     m.set_state(p) ;
+//     cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+//     m.set_state(p) ;
+//     cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+//     m.set_state(p) ;
+//     cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+//     m.set_state(p) ;
+//     cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+//     m.set_state(p) ;
+//     cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+//     m.set_state(p) ;
+//     cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+//     m.set_state(p) ;
+//     cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+//     m.set_state(p) ;
+//     cout << p << " " << m.get_elevation(p) << endl; p.move(o);
+//     m.set_state(p) ;
+// 
+//     p.x = 4; p.y = 7;
+//     m.set_state(p);
+//     cout << p << " " << m.get_elevation(p) << endl;
+//     p.x = 3; p.y = 7;
+//     m.set_state(p);
+//     cout << p << " " << m.get_elevation(p) << endl;
 
-    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
-    m.set_state(p) ;
-    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
-    m.set_state(p) ;
-    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
-    m.set_state(p) ;
-    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
-    m.set_state(p) ;
-    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
-    m.set_state(p) ;
-    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
-    m.set_state(p) ;
-    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
-    m.set_state(p) ;
-    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
-    m.set_state(p) ;
-    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
-    m.set_state(p) ;
-    cout << p << " " << m.get_elevation(p) << endl; p.move(o);
-    m.set_state(p) ;
-
-    cout << m.size().first << " " << m.size().second;
+//     cout << m.get_size().first << " " << m.get_size().second << endl;
 
 
-    // m.ValueIteration(0.00001);
+
+    m.ValueIteration(0.0001);
+
+    cout << m.get_start() << " " << m.get_value( m.get_start() ) << endl;
+    cout << m.get_end() << " " << m.get_value( m.get_end() ) << endl << endl;
 
     return 0;
 }
