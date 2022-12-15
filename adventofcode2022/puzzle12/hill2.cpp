@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <bits/stdc++.h>
-#include <Eigen/Dense>
+// #include <Eigen/Dense>
 
 using namespace std;
 // using namespace Eigen;
@@ -13,9 +13,9 @@ using namespace std;
 #define GAMMA 1.0
 
 enum class Action {
-    down, 
-    up, 
-    right, 
+    down,
+    up,
+    right,
     left
 };
 
@@ -30,37 +30,32 @@ ostream& operator<<(ostream& os, const Action& a) {
 }
 
 struct Odom {
-    Odom(Action a) :  a(a) {
+    Odom(Action a) : a(a) {
         switch (a) {
             case Action::down:
-                // cout << endl << "Going down!" << endl;
                 x = 1;
                 y = 0;
                 break;
             case Action::up:
-                // cout << endl << "Going up!" << endl;
                 x = -1;
                 y = 0;
                 break;
             case Action::right:
-                // cout << endl << "Going right!" << endl;
                 x = 0;
                 y = 1;
                 break;
             case Action::left:
-                // cout << endl << "Going left!" << endl;
                 x = 0;
                 y = -1;
                 break;
         }
     };
-    Odom ( int x, int y ) : a(Action::down), x(x), y(y) {}; 
+    Odom ( int x, int y ) : a(Action::down), x(x), y(y) {};
 
     Action a;
     int x;
     int y;
 };
-
 
 struct Point {
     Point() : x(0), y(0) {};
@@ -73,7 +68,7 @@ struct Point {
         y += v.y;
     }
 
-    friend ostream& operator <<(ostream& os, const Point& p);
+    friend ostream& operator<< ( ostream& os, const Point& p );
     friend bool operator< ( Point const&lhs, Point const& rhs );
     friend bool operator== ( Point const&lhs, Point const& rhs );
 };
@@ -83,6 +78,7 @@ ostream& operator<<(ostream& os, const Point& p) {
 
     return os;
 }
+
 bool operator== ( Point const& lhs, Point const& rhs ) {
     if ( lhs.x == rhs.x && lhs.y == rhs.y )
         return true;
@@ -98,7 +94,6 @@ bool operator< ( Point const& lhs, Point const& rhs ) {
 }
 
 namespace std {
-
   template <>
   struct hash<Point>
   {
@@ -116,7 +111,6 @@ namespace std {
                ^ (hash<int>()(p.y) << 1)) >> 1);
     }
   };
-
 }
 
 Odom relative ( Point p, Point q ) { return Odom {p.x-q.x, p.y-q.y}; }
@@ -148,6 +142,10 @@ class ElvenHill {
         float reward( Point p, Point q ) { 
             if ( p == end ) { return 0.0; }
             return -1.0;
+        }
+        float reward_taxi( Point p, Point q ) { 
+            if ( p == end ) { return 0.0; }
+            return -taxicab(q, end);
         }
         Point transition ( Point p, Action a );
         void next_state () { state = transition(get_state(), get_policy(get_state())); }
@@ -212,7 +210,7 @@ void ElvenHill::processLine(string line, int i) {
             c = 'z';
         }
         elevation.insert( make_pair(p, c-a) );
-        value.insert( make_pair(p, -1000.0) );
+        value.insert( make_pair(p, -520.0) );
         policy.insert( make_pair(p, Action::down) );
     }
     state = start;
@@ -247,6 +245,7 @@ void ElvenHill::ValueIteration (float theta) {
             for ( const auto& a : actions ) {
                 Point tmp = transition(s, a);
                 vals.push_back( reward(s, tmp) + GAMMA*value[tmp] );
+                // vals.push_back( reward_taxi(s, tmp) + GAMMA*value[tmp] );
             }
             value[s] = *max_element(vals.begin(), vals.end());
             Delta = max( Delta, abs(v-value[s]) );
