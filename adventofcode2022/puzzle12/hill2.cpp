@@ -5,122 +5,16 @@
 #include <vector>
 #include <string>
 #include <bits/stdc++.h>
+
+#include "Point.h"
+#include "Odom.h"
+#include "Action.h"
 // #include <Eigen/Dense>
 
 using namespace std;
 // using namespace Eigen;
 
 #define GAMMA 1.0
-
-enum class Action {
-    down,
-    up,
-    right,
-    left
-};
-
-ostream& operator<<(ostream& os, const Action& a) {
-    switch (a) {
-        case Action::down: os << "down"; break;
-        case Action::up: os << "up"; break;
-        case Action::right: os << "right"; break;
-        case Action::left: os << "left"; break;
-    }
-    return os;
-}
-
-struct Odom {
-    Odom(Action a) : a(a) {
-        switch (a) {
-            case Action::down:
-                x = 1;
-                y = 0;
-                break;
-            case Action::up:
-                x = -1;
-                y = 0;
-                break;
-            case Action::right:
-                x = 0;
-                y = 1;
-                break;
-            case Action::left:
-                x = 0;
-                y = -1;
-                break;
-        }
-    };
-    Odom ( int x, int y ) : a(Action::down), x(x), y(y) {};
-
-    Action a;
-    int x;
-    int y;
-};
-
-struct Point {
-    Point() : x(0), y(0) {};
-    Point(int x, int y) : x(x), y(y) {};
-    int x;
-    int y;
-
-    void move(Odom v) {
-        x += v.x;
-        y += v.y;
-    }
-
-    friend ostream& operator<< ( ostream& os, const Point& p );
-    friend bool operator< ( Point const&lhs, Point const& rhs );
-    friend bool operator== ( Point const&lhs, Point const& rhs );
-};
-
-ostream& operator<<(ostream& os, const Point& p) {
-    os << "(" << p.x << ", " << p.y << ")";
-
-    return os;
-}
-
-bool operator== ( Point const& lhs, Point const& rhs ) {
-    if ( lhs.x == rhs.x && lhs.y == rhs.y )
-        return true;
-    return false;
-}
-
-bool operator< ( Point const& lhs, Point const& rhs ) {
-    if ( lhs.x < rhs.x )
-        return true;
-    else if ( lhs.x == rhs.x )
-        if ( lhs.y < rhs.y ) { return true; }
-    return false;
-}
-
-namespace std {
-  template <>
-  struct hash<Point>
-  {
-    std::size_t operator()(const Point& p) const
-    {
-      using std::size_t;
-      using std::hash;
-      using std::string;
-
-      // Compute individual hash values for first,
-      // second and third and combine them using XOR
-      // and bit shifting:
-
-      return ((hash<int>()(p.x)
-               ^ (hash<int>()(p.y) << 1)) >> 1);
-    }
-  };
-}
-
-Odom relative ( Point p, Point q ) { return Odom {p.x-q.x, p.y-q.y}; }
-
-int taxicab ( Odom rel ) { return abs( rel.x ) + abs( rel.y ); }
-
-int taxicab ( Point p, Point q ) {
-    Odom rel = relative(p, q);
-    return taxicab( rel );
-}
 
 class ElvenHill {
     public:
@@ -148,12 +42,15 @@ class ElvenHill {
             return -taxicab(q, end);
         }
         Point transition ( Point p, Action a );
-        void next_state () { state = transition(get_state(), get_policy(get_state())); }
+        void next_state () { 
+            state = transition(get_state(), get_policy(get_state())); }
         void next_state ( Point p ) { state = transition(p, get_policy(p)); }
         void next_state ( Action a ) { state = transition(get_state(), a); }
         void next_state ( Point p, Action a ) { state = transition(p, a); }
         void ValueIteration(float theta);
         void bestStart();
+        void simulate(int steps);
+        void simulate(int steps, Point p);
     private:
         Point start;
         Point end;
@@ -163,6 +60,7 @@ class ElvenHill {
         unordered_map<Point, Action, std::hash<Point>> policy;
         Point state;
         pair<int, int> size;
+        vector<Point> trajectory;
 
         friend ostream& operator <<(ostream& os, const ElvenHill& m);
         friend istream& operator >>(istream& input, ElvenHill& m);
@@ -237,22 +135,32 @@ void ElvenHill::ValueIteration (float theta) {
     while ( Delta > theta ) {
         Delta = 0.0;
         map<Point, int>::iterator it;
+
+        if ( i++ % 25 == 0 ) {
+            cout << "Value[start] = " << value[start] << ", Policy[start] = " 
+                 << policy[start] << ", Iteration = " << i-1 << endl;
+        }
+
         for (it=elevation.begin(); it!=elevation.end(); it++) {
             Point s = it->first;
             float v = value[s];
-            vector<Action> actions {Action::down, Action::up, Action::right, Action::left};
+            vector<Action> actions {Action::down, Action::up, Action::right, 
+                                    Action::left};
             vector<float> vals;
             for ( const auto& a : actions ) {
                 Point tmp = transition(s, a);
                 vals.push_back( reward(s, tmp) + GAMMA*value[tmp] );
                 // vals.push_back( reward_taxi(s, tmp) + GAMMA*value[tmp] );
             }
-            value[s] = *max_element(vals.begin(), vals.end());
+            auto iter = max_element(vals.begin(), vals.end());
+            policy[s] = Action(iter-vals.begin());
+            value[s] = *iter;
             Delta = max( Delta, abs(v-value[s]) );
         }
-        cout << "Value[start] = " << value[start] << ", Delta = " << Delta 
-             << ", Iteration = " << ++i << endl;
     }
+    cout << endl << "Value[start] = " << value[start] << ", Policy[start] = " 
+         << policy[start] << ", Iteration = " << i << ", Delta = " << Delta 
+         << "." << endl;
 }
 
 void ElvenHill::bestStart() {
@@ -264,13 +172,38 @@ void ElvenHill::bestStart() {
         }
     }
     cout << "Best start = " << beststart << ", with Value[beststart] = " 
-         << value[beststart] << endl;
+         << value[beststart] << ", Policy[beststart] = " << policy[beststart] 
+         << "." << endl;
 }
+
+
+void ElvenHill::simulate(int steps, Point p) {
+    state = p;
+    Odom v {Action::down};
+    trajectory.push_back(state);
+    ofstream myfile;
+    myfile.open ("trajectory.csv");
+    for (int i=0; i<steps; ++i) {
+        myfile << state.y << "," << -state.x << endl;
+        v.set_odom(policy[state]);
+        state.move(v);
+        trajectory.push_back(state);
+    }
+    myfile << state.y << "," << -state.x << endl;
+    myfile.close();
+}
+
+void ElvenHill::simulate(int steps) {
+    simulate(steps, start);
+}
+
 
 int main() {
     ifstream ist {"input"};
     ElvenHill m;
     ist >> m;
+
+    m.simulate( abs(m.get_value(m.get_state())) );
 
     return 0;
 }
