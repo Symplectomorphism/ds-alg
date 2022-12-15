@@ -258,8 +258,8 @@ void ElvenHill::ValueIteration (float theta) {
             Delta = max( Delta, abs(v-value[s]) );
 //             cout << "Point: " << s << ", Delta: " << Delta << " " << v << " " << value[s] << endl;
         }
-        cout << "Value[start] = " << value[start] << ", Delta = " << Delta 
-             << ", Iteration = " << ++i << endl;
+        // cout << "Value[start] = " << value[start] << ", Delta = " << Delta 
+        //      << ", Iteration = " << ++i << endl;
     }
 }
 
@@ -304,7 +304,7 @@ int main() {
 
 
 
-    m.ValueIteration(0.0001);
+    m.ValueIteration(1);
 
     cout << m.get_start() << " " << m.get_value( m.get_start() ) << endl;
     cout << m.get_end() << " " << m.get_value( m.get_end() ) << endl << endl;
