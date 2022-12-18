@@ -8,10 +8,12 @@ df = DataFrame(file);
 x = df[:,1]
 y = df[:,2]
 
-fig = figure(1, figsize=(10,8))
+fig = figure(1, figsize=(25, 6))
 fig.clf()
 ax = PyPlot.subplot(1,1,1);
-ax.plot(x, y, linewidth=2);
+ax.plot(x, y, linewidth=3);
+ax.set_xlim(-0.3,170);
+ax.set_ylim(-40,0.3);
 ax.set_xlabel(L"x", fontsize=15)
 ax.set_ylabel(L"y", fontsize=15)
 ax.tick_params(axis="both", labelsize=15)
